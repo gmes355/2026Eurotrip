@@ -24,13 +24,39 @@
             color: var(--morandi-text);
         }
         
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* 橫向工具列容器 */
+        /* 橫向工具列容器與捲動優化 */
         header.sticky {
             background-color: var(--morandi-bg);
             box-shadow: none; 
             border-bottom: none;
+        }
+
+        #date-selector {
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            cursor: grab;
+            user-select: none;
+        }
+
+        #date-selector:active {
+            cursor: grabbing;
+        }
+
+        /* 電腦版顯示細微滾動條方便視覺引導 */
+        @media (min-width: 1024px) {
+            #date-selector::-webkit-scrollbar {
+                display: block;
+                height: 5px;
+            }
+            #date-selector::-webkit-scrollbar-thumb {
+                background: rgba(151, 163, 152, 0.3);
+                border-radius: 10px;
+            }
+        }
+
+        @media (max-width: 1023px) {
+            .hide-scrollbar::-webkit-scrollbar { display: none; }
+            #date-selector { -ms-overflow-style: none; scrollbar-width: none; }
         }
 
         /* 橫向工具列按鈕 */
@@ -211,6 +237,35 @@
             lucide.createIcons();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // 電腦端滑鼠拖拽捲動邏輯
+        const scrollContainer = document.getElementById('date-selector');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        scrollContainer.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - scrollContainer.offsetLeft;
+            scrollLeft = scrollContainer.scrollLeft;
+        });
+        scrollContainer.addEventListener('mouseleave', () => { isDown = false; });
+        scrollContainer.addEventListener('mouseup', () => { isDown = false; });
+        scrollContainer.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - scrollContainer.offsetLeft;
+            const walk = (x - startX) * 2; 
+            scrollContainer.scrollLeft = scrollLeft - walk;
+        });
+
+        // 支援滾輪橫向捲動
+        scrollContainer.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                scrollContainer.scrollLeft += e.deltaY;
+            }
+        });
         const itinerary = {
     1: { 
         date: "02/17", day: "二", city: "巴黎", 
