@@ -165,7 +165,7 @@
                 btn.onclick = () => showDay(day);
                 btn.innerHTML = `
                     <span class="text-[12px] font-black opacity-70 uppercase">D${day}</span>
-                    <span class="text-[18px] font-black tracking-tighter">${item.date}</span>
+                    <span class="text-[18px] font-black tracking-tighter">${item.date.replace(/\//g, '.')}</span>
                     <span class="text-[13px] font-bold opacity-90">${item.day}</span>
                 `;
                 selector.appendChild(btn);
