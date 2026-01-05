@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
+        /* 提升飽和度與對比度：微調莫蘭迪配色系統 */
         :root {
             --morandi-bg: #EBEAE4;      
             --morandi-blue: #7D92A1;    
@@ -14,7 +15,7 @@
             --morandi-text: #3D444C;    
             --morandi-card: #DEDDD7;    
             --morandi-dark: #5A6B78;    
-            --card-border: rgba(151, 163, 152, 0.4);
+            --card-border: rgba(151, 163, 152, 0.4); /* 外框線樣式和時間軸線一致 (morandi-green + opacity) */
         }
 
         body { 
@@ -23,6 +24,7 @@
             color: var(--morandi-text);
         }
         
+        /* 橫向工具列容器與捲動優化 */
         header.sticky {
             background-color: var(--morandi-bg);
             box-shadow: none; 
@@ -36,21 +38,36 @@
             user-select: none;
         }
 
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        #date-selector:active {
+            cursor: grabbing;
+        }
 
-        /* 橫向工具列按鈕：按鈕高度與內部行距優化 */
+        /* 電腦版顯示細微滾動條方便視覺引導 */
+        @media (min-width: 1024px) {
+            #date-selector::-webkit-scrollbar {
+                display: block;
+                height: 5px;
+            }
+            #date-selector::-webkit-scrollbar-thumb {
+                background: rgba(151, 163, 152, 0.3);
+                border-radius: 10px;
+            }
+        }
+
+        @media (max-width: 1023px) {
+            .hide-scrollbar::-webkit-scrollbar { display: none; }
+            #date-selector { -ms-overflow-style: none; scrollbar-width: none; }
+        }
+
+        /* 橫向工具列按鈕：文字加大、縮小 Padding 讓文字靠近邊界 */
         .date-card { 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             background-color: rgba(255, 255, 255, 0.5);
             border: 1px solid rgba(0, 0, 0, 0.08);
             aspect-ratio: 1 / 1;
-            padding: 10px 8px !important; /* 稍微增加上下 Padding */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between; /* 讓 D1、日期、星期拉開距離 */
-            align-items: center;
+            line-height: 1.1; 
+            padding: 4px !important;
         }
-
         .date-card.active { 
             background-color: var(--morandi-blue); 
             color: white; 
@@ -59,27 +76,12 @@
             border-color: transparent;
         }
 
-        /* 模擬圖片中的斜線設計 */
-        .slash-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            width: 100%;
-            height: 32px;
+        /* 斜線樣式微調 */
+        .date-slash {
+            font-size: 0.85em;
+            opacity: 0.8;
+            margin: 0 1px;
         }
-
-        .slash-line {
-            width: 1.5px;
-            height: 30px;
-            background-color: currentColor;
-            opacity: 0.5;
-            transform: rotate(20deg);
-            margin: 0 8px; /* 設定兩邊數字與線條的距離 */
-        }
-
-        .month-pos { align-self: flex-start; margin-top: -2px; }
-        .date-pos { align-self: flex-end; margin-bottom: -2px; }
         
         .timeline-line::before { 
             content: ''; position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; 
@@ -87,17 +89,26 @@
         }
         .wrap-text { word-break: break-all; white-space: pre-line; }
 
+        /* Today's Highlight 卡片 */
         .master-card-styled {
             background-color: var(--morandi-card);
             border: 1px solid rgba(0, 0, 0, 0.08);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
         }
 
+        /* 行程卡片：框線樣式同步時間軸，陰影同步 master-card */
         .event-card {
             background-color: rgba(255, 255, 255, 0.8);
             border: 1px solid var(--card-border);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
         }
+
+        .event-card-desc { font-size: 16.5px; } 
+        .event-card-time { font-size: 14px; }
+        
+        /* 交通資訊字號大於 Info */
+        .transport-text { font-size: 13.5px; }
+        .info-text { font-size: 12px; }
     </style>
 </head>
 <body class="pb-10">
@@ -109,6 +120,7 @@
     <main class="px-4 mt-2">
         <div id="master-card" class="mb-8 master-card-styled rounded-[2.5rem] p-7 relative overflow-hidden">
             <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/30 rounded-full blur-3xl"></div>
+            
             <div class="flex justify-between items-start relative z-10">
                 <div>
                     <span class="text-[10px] bg-slate-700 text-white px-2.5 py-1 rounded-md font-black tracking-widest uppercase shadow-sm">Today's Highlight</span>
@@ -119,7 +131,9 @@
                     <i id="weather-icon" data-lucide="cloud-sun" class="w-6 h-6 text-slate-600"></i>
                 </div>
             </div>
+
             <p id="overview-highlights" class="text-[16px] text-slate-700 font-bold mt-4 leading-relaxed relative z-10"></p>
+
             <div id="booking-section" class="mt-6 pt-6 border-t border-slate-500/10 relative z-10">
                 <div class="flex items-center gap-2 mb-3 text-slate-500">
                     <i data-lucide="map-pin" class="w-4 h-4"></i>
@@ -129,11 +143,13 @@
                 <div id="booking-map-link"></div>
             </div>
         </div>
+
         <div id="daily-timeline" class="relative timeline-line space-y-6"></div>
     </main>
 
     <script>
         const cityCoords = { "巴黎": {lat: 48.85, lon: 2.35}, "巴塞隆納": {lat: 41.38, lon: 2.17}, "馬德里": {lat: 40.41, lon: -3.70}, "維也納": {lat: 48.20, lon: 16.37} };
+
         let currentDay = 1;
 
         async function fetchWeather(city) {
@@ -146,93 +162,121 @@
             } catch (e) { tempEl.innerText = "--°C"; }
         }
 
-        // 星期轉換函數
-        function getEnDay(zhDay) {
-            const map = { 
-                '週一': 'Mon', '週二': 'Tue', '週三': 'Wed', '週四': 'Thu', '週五': 'Fri', '週六': 'Sat', '週日': 'Sun',
-                '一': 'Mon', '二': 'Tue', '三': 'Wed', '四': 'Thu', '五': 'Fri', '六': 'Sat', '日': 'Sun'
-            };
-            return map[zhDay] || zhDay;
-        }
-
         function renderDates() {
             const selector = document.getElementById('date-selector');
-            if (!selector) return;
             selector.innerHTML = '';
+
             Object.keys(itinerary).forEach(day => {
                 const item = itinerary[day];
-                const [month, date] = item.date.split('/');
+                const dateParts = item.date.split('/');
+                const formattedDate = dateParts.length === 2 
+                    ? `${dateParts[0]}<span class="date-slash">/</span>${dateParts[1]}` 
+                    : item.date;
+
                 const btn = document.createElement('button');
-                btn.className = `date-card flex-shrink-0 w-24 h-24 rounded-[30px] transition-all ${day == currentDay ? 'active' : 'text-slate-600'}`;
+                btn.className = `date-card flex-shrink-0 w-24 h-24 rounded-[32px] flex flex-col items-center justify-center transition-all ${day == currentDay ? 'active' : 'text-slate-600'}`;
                 btn.onclick = () => showDay(day);
                 btn.innerHTML = `
-                    <span class="text-[11px] font-black opacity-60 tracking-widest">D${day}</span>
-                    <div class="slash-container">
-                        <span class="text-[15px] font-black month-pos">${month}</span>
-                        <div class="slash-line"></div>
-                        <span class="text-[21px] font-black date-pos">${date}</span>
-                    </div>
-                    <span class="text-[13px] font-bold opacity-90">${getEnDay(item.day)}</span>
+                    <span class="text-[13px] font-black opacity-70 uppercase mb-0.5">D${day}</span>
+                    <span class="text-[22px] font-black tracking-tighter">${formattedDate}</span>
+                    <span class="text-[14px] font-bold opacity-90 mt-0.5">${item.day}</span>
                 `;
                 selector.appendChild(btn);
             });
         }
 
         function showDay(day) {
-    currentDay = day;
-    renderDates();
-    const data = itinerary[day];
-    if (!data) return;
+            currentDay = day;
+            renderDates();
+            
+            const data = itinerary[day];
+            if (!data) return;
 
-    // --- 新增：城市天數邏輯計算 ---
-    let cityDayCount = 0;
-    // 遍歷行程，計算到目前為止這個城市出現了幾次
-    for (let i = 1; i <= day; i++) {
-        if (itinerary[i] && itinerary[i].city === data.city) {
-            cityDayCount++;
-        }
-    }
+            document.getElementById('overview-title').innerText = `${data.city} · Day ${day}`;
+            document.getElementById('overview-highlights').innerText = data.highlights;
 
-    // --- 修正標題顯示邏輯 ---
-    const titleEl = document.getElementById('overview-title');
-    if (data.city === "台北") {
-        titleEl.innerText = "台北";
-    } else {
-        titleEl.innerText = `${data.city} · Day ${cityDayCount}`;
-    }
-    // ----------------------------
+            const bookingText = document.getElementById('overview-booking');
+            const bookingMapBtn = document.getElementById('booking-map-link');
+            const bookingSection = document.getElementById('booking-section');
 
-    document.getElementById('overview-highlights').innerText = data.highlights;
-    
-    const bookingSection = document.getElementById('booking-section');
-    if (data.booking) {
-        bookingSection.style.display = 'block';
-        document.getElementById('overview-booking').innerText = data.booking;
-    } else {
-        bookingSection.style.display = 'none';
-    }
+            if (data.booking) {
+                bookingSection.style.display = 'block';
+                bookingText.innerText = data.booking;
 
-    const timeline = document.getElementById('daily-timeline');
-    timeline.innerHTML = '';
-    data.events.forEach(ev => {
-        const card = document.createElement('div');
-        card.className = "relative pl-14 pr-2 mb-6";
-        card.innerHTML = `
-            <div class="absolute left-[20px] top-[28px] w-[10px] h-[10px] rounded-full bg-slate-500 ring-4 ring-white z-10 shadow-sm"></div>
-            <div class="event-card rounded-[2.2rem] p-6">
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="bg-slate-200 text-slate-700 text-[14px] font-black px-3 py-1.5 rounded-xl min-w-[75px] text-center">${ev.time}</span>
-                    <h3 class="font-bold text-slate-800 text-[16.5px] leading-tight">${ev.desc}</h3>
-                </div>
-                ${ev.transport ? `<p class="text-[13px] text-slate-600 font-bold bg-slate-100 p-2 rounded-lg">${ev.transport}</p>` : ''}
-            </div>`;
-        timeline.appendChild(card);
-    });
+                if (data.hotelMap) {
+                    bookingMapBtn.innerHTML = `
+                        <a href="${data.hotelMap}" target="_blank" class="inline-flex items-center gap-2 bg-white/70 text-slate-700 text-[11px] font-black px-4 py-2 rounded-xl shadow-sm border-none transition-transform active:scale-95">
+                            <i data-lucide="navigation" class="w-3.5 h-3.5"></i> 定位導航
+                        </a>`;
+                } else {
+                    bookingMapBtn.innerHTML = '';
+                }
+            } else {
+                bookingSection.style.display = 'none';
+            }
 
             fetchWeather(data.city);
+
+            const timeline = document.getElementById('daily-timeline');
+            timeline.innerHTML = '';
+
+            data.events.forEach(ev => {
+                const card = document.createElement('div');
+                card.className = "relative pl-14 pr-2 mb-6";
+                card.innerHTML = `
+                    <div class="absolute left-[20px] top-[28px] w-[10px] h-[10px] rounded-full bg-slate-500 ring-4 ring-white z-10 shadow-sm"></div>
+                    <div class="event-card rounded-[2.2rem] p-6">
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-slate-200 text-slate-700 event-card-time font-black px-3 py-1.5 rounded-xl min-w-[75px] text-center">${ev.time}</span>
+                                <h3 class="font-bold text-slate-800 event-card-desc leading-tight flex-1">${ev.desc}</h3>
+                            </div>
+                            ${ev.transport ? `
+                                <div class="flex items-start gap-2 bg-slate-100/80 px-3 py-2.5 rounded-xl border border-slate-200">
+                                    <i data-lucide="bus" class="w-4 h-4 text-slate-500 mt-0.5"></i>
+                                    <span class="transport-text text-slate-600 font-bold wrap-text leading-tight">${ev.transport.replace('⏏︎', '')}</span>
+                                </div>` : ''}
+                            ${ev.info ? `<p class="info-text text-slate-500 px-1 wrap-text font-medium leading-relaxed">${ev.info}</p>` : ''}
+                            <div class="flex gap-2 mt-1">
+                                ${ev.map ? `<a href="${ev.map}" target="_blank" class="flex items-center gap-1.5 bg-white text-slate-600 text-[12px] font-bold px-3 py-2 rounded-lg border border-slate-200 shadow-sm"><i data-lucide="map" class="w-4 h-4 text-slate-400"></i>導航</a>` : ''}
+                                ${ev.pdf ? `<a href="${ev.pdf}" target="_blank" class="flex items-center gap-1.5 bg-white text-slate-600 text-[12px] font-bold px-3 py-2 rounded-lg border border-slate-200 shadow-sm"><i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>附件</a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                timeline.appendChild(card);
+            });
+
             lucide.createIcons();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        const scrollContainer = document.getElementById('date-selector');
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        scrollContainer.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - scrollContainer.offsetLeft;
+            scrollLeft = scrollContainer.scrollLeft;
+        });
+        scrollContainer.addEventListener('mouseleave', () => { isDown = false; });
+        scrollContainer.addEventListener('mouseup', () => { isDown = false; });
+        scrollContainer.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - scrollContainer.offsetLeft;
+            const walk = (x - startX) * 2; 
+            scrollContainer.scrollLeft = scrollLeft - walk;
+        });
+
+        scrollContainer.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                scrollContainer.scrollLeft += e.deltaY;
+            }
+        });
         const itinerary = {
     1: { 
         date: "02/17", day: "二", city: "巴黎", 
