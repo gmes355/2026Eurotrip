@@ -130,7 +130,7 @@
             
             <div class="flex justify-between items-start relative z-10">
                 <div>
-                    <span id="overview-tag" class="text-[10px] bg-slate-700 text-white px-2.5 py-1 rounded-md font-black tracking-widest uppercase shadow-sm">Today's Highlight</span>
+                    <span class="text-[10px] bg-slate-700 text-white px-2.5 py-1 rounded-md font-black tracking-widest uppercase shadow-sm">Today's Highlight</span>
                     <h2 id="overview-title" class="text-2xl font-black mt-3 text-slate-800 tracking-tight">載入中...</h2>
                 </div>
                 <div id="weather-box" class="flex items-center gap-2 px-2 py-1 text-slate-700">
@@ -204,8 +204,6 @@
             const data = itinerary[day];
             if (!data) return;
 
-            // 更新標題與手動 Tag 文字
-            document.getElementById('overview-tag').innerText = data.tag || "Today's Highlight";
             document.getElementById('overview-title').innerText = `${data.city} · Day ${day}`;
             document.getElementById('overview-highlights').innerText = data.highlights;
 
