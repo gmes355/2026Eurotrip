@@ -9,11 +9,12 @@
     <style>
         /* 提升飽和度與對比度：微調莫蘭迪配色系統 */
         :root {
-            --morandi-bg: #EBEAE4;      /* 稍微加深底色對比 */
-            --morandi-blue: #7D92A1;    /* 提升藍色飽和度 */
-            --morandi-green: #97A398;   /* 提升綠色飽和度 */
-            --morandi-text: #3D444C;    /* 文字加深提高對比 */
-            --morandi-card: #DEDDD7;    /* 卡片底色加深 */
+            --morandi-bg: #EBEAE4;      
+            --morandi-blue: #7D92A1;    
+            --morandi-green: #97A398;   
+            --morandi-text: #3D444C;    
+            --morandi-card: #DEDDD7;    
+            --morandi-dark: #5A6B78;    /* 用於標題加強對比 */
         }
 
         body { 
@@ -24,19 +25,20 @@
         
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* 橫向工具列容器：增加背景色長條，防止滑動時內容穿透重疊 */
+        /* 橫向工具列容器：背景色長條，移除陰影 */
         header.sticky {
             background-color: var(--morandi-bg);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: none; 
+            border-bottom: 1px solid rgba(0,0,0,0.03);
         }
 
-        /* 橫向工具列按鈕：1:1 比例，縮小行距讓文字填滿 */
+        /* 橫向工具列按鈕：字號調大，行距放寬一點 */
         .date-card { 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             background-color: rgba(255, 255, 255, 0.5);
             border: 1px solid rgba(0, 0, 0, 0.08);
             aspect-ratio: 1 / 1;
-            line-height: 1.1; /* 縮小行距 */
+            line-height: 1.3; /* 調整行距不再太擠 */
         }
         .date-card.active { 
             background-color: var(--morandi-blue); 
@@ -58,6 +60,10 @@
             border: 1px solid rgba(0, 0, 0, 0.08);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
         }
+
+        /* 調整卡片內的通用字號微調 */
+        .event-card-desc { font-size: 16.5px; } /* 稍微大一點點 */
+        .event-card-time { font-size: 14px; }
     </style>
 </head>
 <body class="pb-10">
@@ -72,23 +78,23 @@
             
             <div class="flex justify-between items-start relative z-10">
                 <div>
-                    <span class="text-[10px] bg-white/40 text-slate-700 px-2.5 py-1 rounded-md font-black tracking-widest uppercase">Today's Highlight</span>
+                    <span class="text-[10px] bg-slate-700 text-white px-2.5 py-1 rounded-md font-black tracking-widest uppercase shadow-sm">Today's Highlight</span>
                     <h2 id="overview-title" class="text-2xl font-black mt-3 text-slate-800 tracking-tight">載入中...</h2>
                 </div>
                 <div id="weather-box" class="flex items-center gap-2 bg-white/50 backdrop-blur-sm px-3 py-2 rounded-2xl border border-white/60 shadow-sm text-slate-700">
-                    <span id="temp-display" class="text-xs font-black">--°C</span>
+                    <span id="temp-display" class="text-sm font-black">--°C</span>
                     <i id="weather-icon" data-lucide="cloud-sun" class="w-4 h-4 text-slate-500"></i>
                 </div>
             </div>
 
-            <p id="overview-highlights" class="text-[15px] text-slate-700 font-bold mt-4 leading-relaxed relative z-10"></p>
+            <p id="overview-highlights" class="text-[16px] text-slate-700 font-bold mt-4 leading-relaxed relative z-10"></p>
 
             <div id="booking-section" class="mt-6 pt-6 border-t border-slate-500/10 relative z-10">
                 <div class="flex items-center gap-2 mb-3 text-slate-500">
                     <i data-lucide="map-pin" class="w-4 h-4"></i>
-                    <span class="text-[11px] font-black uppercase tracking-wider italic">Booking & Stay</span>
+                    <span class="text-[12px] font-black uppercase tracking-wider italic">Booking & Stay</span>
                 </div>
-                <p id="overview-booking" class="text-[13px] text-slate-600 font-medium leading-relaxed mb-4 wrap-text"></p>
+                <p id="overview-booking" class="text-[14px] text-slate-600 font-medium leading-relaxed mb-4 wrap-text"></p>
                 <div id="booking-map-link"></div>
             </div>
         </div>
@@ -119,15 +125,14 @@
                 const item = itinerary[day];
                 const btn = document.createElement('button');
                 
-                // 寬 24 (約96px) 以達到 1:1 視覺感，縮減 padding 讓文字填滿
-                btn.className = `date-card flex-shrink-0 w-24 h-24 rounded-[30px] flex flex-col items-center justify-center transition-all px-1 ${day == currentDay ? 'active' : 'text-slate-500'}`;
+                // 字號調整大一點點
+                btn.className = `date-card flex-shrink-0 w-24 h-24 rounded-[30px] flex flex-col items-center justify-center transition-all px-1 ${day == currentDay ? 'active' : 'text-slate-600'}`;
                 
                 btn.onclick = () => showDay(day);
-                // 文字更接近邊緣，行距縮小
                 btn.innerHTML = `
-                    <span class="text-[11px] font-black opacity-70 uppercase mb-0.5">D${day}</span>
-                    <span class="text-[17px] font-black tracking-tighter">${item.date}</span>
-                    <span class="text-[12px] font-bold opacity-90 mt-0.5">${item.day}</span>
+                    <span class="text-[12px] font-black opacity-70 uppercase">D${day}</span>
+                    <span class="text-[18px] font-black tracking-tighter">${item.date}</span>
+                    <span class="text-[13px] font-bold opacity-90">${item.day}</span>
                 `;
                 selector.appendChild(btn);
             });
@@ -152,9 +157,10 @@
                 bookingText.innerText = data.booking;
 
                 if (data.hotelMap) {
+                    // 交換配色：按鈕改為淺色背景
                     bookingMapBtn.innerHTML = `
-                        <a href="${data.hotelMap}" target="_blank" class="inline-flex items-center gap-2 bg-slate-700 text-slate-50 text-[11px] font-black px-5 py-2.5 rounded-xl shadow-md transition-transform active:scale-95">
-                            <i data-lucide="navigation" class="w-3.5 h-3.5"></i> 飯店導航
+                        <a href="${data.hotelMap}" target="_blank" class="inline-flex items-center gap-2 bg-white/70 text-slate-700 text-[12px] font-black px-5 py-2.5 rounded-xl border border-white/80 shadow-sm transition-transform active:scale-95">
+                            <i data-lucide="navigation" class="w-4 h-4"></i> 定位導航
                         </a>`;
                 } else {
                     bookingMapBtn.innerHTML = '';
@@ -168,7 +174,7 @@
             const timeline = document.getElementById('daily-timeline');
             timeline.innerHTML = `
                 <div class="ml-14 mb-4">
-                    <p class="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] opacity-80">${data.date} / ${data.day}</p>
+                    <p class="text-[12px] font-black text-slate-500 uppercase tracking-[0.2em] opacity-80">${data.date} / ${data.day}</p>
                 </div>
             `;
 
@@ -180,18 +186,18 @@
                     <div class="bg-white/80 rounded-[2.2rem] p-6 border border-white/60 shadow-sm">
                         <div class="flex flex-col gap-3">
                             <div class="flex items-center gap-3">
-                                <span class="bg-slate-200 text-slate-700 text-[13px] font-black px-3 py-1.5 rounded-xl min-w-[70px] text-center">${ev.time}</span>
-                                <h3 class="font-bold text-slate-800 text-[16px] leading-tight flex-1">${ev.desc}</h3>
+                                <span class="bg-slate-200 text-slate-700 event-card-time font-black px-3 py-1.5 rounded-xl min-w-[75px] text-center">${ev.time}</span>
+                                <h3 class="font-bold text-slate-800 event-card-desc leading-tight flex-1">${ev.desc}</h3>
                             </div>
                             ${ev.transport ? `
                                 <div class="flex items-start gap-2 bg-slate-100/80 px-3 py-2.5 rounded-xl border border-slate-200">
-                                    <i data-lucide="bus" class="w-3.5 h-3.5 text-slate-500 mt-0.5"></i>
-                                    <span class="text-[11px] text-slate-600 font-bold wrap-text leading-tight">${ev.transport.replace('⏏︎', '')}</span>
+                                    <i data-lucide="bus" class="w-4 h-4 text-slate-500 mt-0.5"></i>
+                                    <span class="text-[12px] text-slate-600 font-bold wrap-text leading-tight">${ev.transport.replace('⏏︎', '')}</span>
                                 </div>` : ''}
-                            ${ev.info ? `<p class="text-[12px] text-slate-500 px-1 wrap-text font-medium leading-relaxed">${ev.info}</p>` : ''}
+                            ${ev.info ? `<p class="text-[13px] text-slate-500 px-1 wrap-text font-medium leading-relaxed">${ev.info}</p>` : ''}
                             <div class="flex gap-2 mt-1">
-                                ${ev.map ? `<a href="${ev.map}" target="_blank" class="flex items-center gap-1.5 bg-white text-slate-600 text-[11px] font-bold px-3 py-2 rounded-lg border border-slate-200 shadow-sm"><i data-lucide="map" class="w-3.5 h-3.5 text-slate-400"></i>導航</a>` : ''}
-                                ${ev.pdf ? `<a href="${ev.pdf}" target="_blank" class="flex items-center gap-1.5 bg-white text-slate-600 text-[11px] font-bold px-3 py-2 rounded-lg border border-slate-200 shadow-sm"><i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-400"></i>附件</a>` : ''}
+                                ${ev.map ? `<a href="${ev.map}" target="_blank" class="flex items-center gap-1.5 bg-white text-slate-600 text-[12px] font-bold px-3 py-2 rounded-lg border border-slate-200 shadow-sm"><i data-lucide="map" class="w-4 h-4 text-slate-400"></i>導航</a>` : ''}
+                                ${ev.pdf ? `<a href="${ev.pdf}" target="_blank" class="flex items-center gap-1.5 bg-white text-slate-600 text-[12px] font-bold px-3 py-2 rounded-lg border border-slate-200 shadow-sm"><i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i>附件</a>` : ''}
                             </div>
                         </div>
                     </div>
