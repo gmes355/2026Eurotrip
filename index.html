@@ -22,8 +22,8 @@
     </header>
 
     <main class="px-4 mt-6">
-        <div id="master-card" class="mb-6 bg-slate-900 rounded-[2.2rem] p-6 shadow-xl relative overflow-hidden">
-            <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl"></div>
+        <div id="master-card" class="mb-6 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[2.2rem] p-6 shadow-lg shadow-blue-200 relative overflow-hidden">
+            <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
             
             <div id="weather-box" class="absolute top-0 right-0 p-5 text-right">
                 <div class="flex items-center justify-end gap-2 text-blue-400 font-black">
@@ -33,19 +33,19 @@
             </div>
 
             <div class="mb-5 relative z-10">
-                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full font-black tracking-wider uppercase border border-blue-500/30">Today's Highlight</span>
+                <span class="text-[10px] bg-white/20 ext-white px-3 py-1 rounded-full font-black tracking-wider uppercase border border-white/30">Today's Highlight</span>
                 <h2 id="overview-title" class="text-2xl font-black mt-3 text-white">載入中...</h2>
-                <p id="overview-highlights" class="text-[14px] text-slate-300 font-medium mt-2 leading-relaxed"></p>
+                <p id="overview-highlights" class="text-[14px] text-blue-50 font-medium mt-2 leading-relaxed"></p>
             </div>
 
-            <div class="h-[1px] bg-slate-800 w-full mb-5"></div>
+            <div class="h-[1px] g-white/10 w-full mb-5"></div>
 
             <div id="booking-section" class="relative z-10">
                 <div class="flex items-center gap-2 mb-3">
                     <i data-lucide="info" class="w-4 h-4 text-orange-400"></i>
-                    <span class="text-[13px] font-bold text-slate-200">重要預約與住宿</span>
+                    <span class="text-[13px] font-bold text-white/90">重要預約與住宿</span>
                 </div>
-                <p id="overview-booking" class="text-[13px] text-slate-400 font-medium leading-relaxed mb-4 wrap-text"></p>
+                <p id="overview-booking" class="text-[13px] text-blue-100 font-medium leading-relaxed mb-4 wrap-text"></p>
                 <div id="booking-map-link"></div>
             </div>
         </div>
@@ -111,7 +111,7 @@
 
                 if (data.hotelMap) {
                     bookingMapBtn.innerHTML = `
-                        <a href="${data.hotelMap}" target="_blank" class="inline-flex items-center gap-2 bg-slate-800 text-orange-400 text-[12px] font-bold px-4 py-2.5 rounded-xl border border-slate-700 mt-2">
+                        <a href="${data.hotelMap}" target="_blank" class="inline-flex items-center gap-2 bg-white/15 text-white text-[12px] font-bold px-4 py-2.5 rounded-xl border border-white/20 backdrop-blur-sm mt-2">
                             <i data-lucide="map-pin" class="w-4 h-4"></i> 前往飯店導航
                         </a>`;
                 } else {
