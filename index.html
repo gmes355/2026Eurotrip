@@ -387,10 +387,52 @@
             renderDates();
             const data = itinerary[day];
             if (!data) return;
+
+            // 更新上方主卡片資訊
             document.getElementById('overview-title').innerText = `${data.city} · Day ${day}`;
             document.getElementById('overview-highlights').innerText = data.highlights;
+            document.getElementById('overview-booking').innerText = data.booking;
+            
+            // 更新地圖按鈕
+            const bookingMap = document.getElementById('booking-map-link');
+            bookingMap.innerHTML = data.hotelMap ? 
+                `<a href="${data.hotelMap}" target="_blank" class="inline-flex items-center gap-2 bg-slate-800 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-lg active:scale-95 transition-transform">
+                    <i data-lucide="map"></i> Open Hotel Map
+                </a>` : '';
+
             fetchWeather(data.city);
-            // 簡化 timeline 渲染部分...
+
+            // 渲染下方的 Daily Timeline 卡片
+            const timeline = document.getElementById('daily-timeline');
+            timeline.innerHTML = '';
+
+            data.events.forEach(event => {
+                const eventEl = document.createElement('div');
+                eventEl.className = 'relative pl-12 pr-2';
+                eventEl.innerHTML = `
+                    <div class="absolute left-[18px] top-2 w-3.5 h-3.5 bg-white border-2 border-[#97A398] rounded-full z-10"></div>
+                    <div class="event-card rounded-3xl p-5 relative overflow-hidden">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-sm font-black text-slate-400 tracking-tighter">${event.time}</span>
+                            <div class="flex gap-2">
+                                ${event.map ? `<a href="${event.map}" target="_blank" class="text-slate-400 hover:text-slate-600"><i data-lucide="map-pin" class="w-4 h-4"></i></a>` : ''}
+                                ${event.pdf ? `<a href="${event.pdf}" target="_blank" class="text-slate-400 hover:text-slate-600"><i data-lucide="file-text" class="w-4 h-4"></i></a>` : ''}
+                            </div>
+                        </div>
+                        <h3 class="text-lg font-black text-slate-800 mb-1">${event.desc}</h3>
+                        ${event.transport ? `
+                            <div class="flex items-center gap-2 text-[#7D92A1] mb-2">
+                                <i data-lucide="bus" class="w-3.5 h-3.5"></i>
+                                <span class="text-[12px] font-bold">${event.transport}</span>
+                            </div>
+                        ` : ''}
+                        <p class="text-[13px] text-slate-500 font-medium leading-relaxed">${event.info}</p>
+                    </div>
+                `;
+                timeline.appendChild(eventEl);
+            });
+
+            // 重新觸發圖示渲染
             lucide.createIcons();
         }
 
