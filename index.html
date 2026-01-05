@@ -204,7 +204,8 @@
             const data = itinerary[day];
             if (!data) return;
 
-            document.getElementById('overview-title').innerText = `${data.city} · Day ${day}`;
+            // 修改處：優先使用 data.title，如果沒定義則顯示 data.highlights
+            document.getElementById('overview-title').innerText = data.title || data.highlights;
             document.getElementById('overview-highlights').innerText = data.highlights;
 
             const bookingText = document.getElementById('overview-booking');
@@ -293,7 +294,7 @@
         });
         const itinerary = {
     1: { 
-        date: "02/17", day: "二", city: "巴黎", 
+        date: "02/17", day: "二", city: "台北","title": "巴黎啟航", 
         highlights: "23:00 台北 TPE 出發，開啟歐洲之旅。", 
         booking: "長榮航空 BR087 (TPE-CDG)", 
         hotelMap: "", 
@@ -302,7 +303,7 @@
         ]
     },
     2: { 
-        date: "02/18", day: "三", city: "巴黎", 
+        date: "02/18", day: "三", city: "巴黎", "title": "巴黎 · Day1",
         highlights: "鐵塔區域完整散步、塞納河遊船、米其林晚宴。", 
         booking: "晚餐：Aldehyde (米其林一星)\n住宿：Citadines Apart'hotel Saint-Germain-des-Prés (需付城市稅 €84.50)", 
         hotelMap: "https://maps.app.goo.gl/CitadinesParis", 
