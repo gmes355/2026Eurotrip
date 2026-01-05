@@ -3,35 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EuroTrip 2026 - 完整詳細版</title>
+    <title>EuroTrip 2026 - 完整導航版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Noto Sans TC", sans-serif;
-            background-color: #F2F2F7;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .ios-blur {
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            background-color: rgba(255, 255, 255, 0.85);
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Noto Sans TC", sans-serif; background-color: #F2F2F7; -webkit-tap-highlight-color: transparent; }
+        .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background-color: rgba(255, 255, 255, 0.85); }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .date-card.active {
-            background-color: #007AFF;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0,122,255,0.25);
-        }
-        .timeline-line::before {
-            content: '';
-            position: absolute;
-            left: 24px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: #E5E5EA;
-        }
+        .date-card.active { background-color: #007AFF; color: white; box-shadow: 0 4px 12px rgba(0,122,255,0.25); }
+        .timeline-line::before { content: ''; position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; background: #E5E5EA; }
         .wrap-text { word-break: break-all; white-space: pre-line; }
     </style>
 </head>
@@ -42,7 +22,7 @@
     </header>
 
     <main class="px-4 mt-6">
-        <div id="overview-card" class="mb-4 bg-white border border-gray-100 rounded-[2.2rem] p-6 shadow-sm overflow-hidden relative">
+        <div id="overview-card" class="mb-4 bg-white border border-gray-100 rounded-[2.2rem] p-6 shadow-sm relative">
             <div id="weather-box" class="absolute top-0 right-0 p-4 text-right">
                 <div class="flex items-center justify-end gap-2 text-blue-500 font-bold">
                     <span id="temp-display">--°C</span>
@@ -50,35 +30,16 @@
                 </div>
             </div>
             <div class="mb-4">
-                <span class="text-[10px] bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-black uppercase tracking-wider">Daily Overview</span>
-                <h2 id="overview-title" class="text-xl font-black mt-2 text-gray-800">行程加載中...</h2>
+                <span class="text-[10px] bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-black uppercase tracking-wider">Itinerary</span>
+                <h2 id="overview-title" class="text-xl font-black mt-2 text-gray-800">載入中...</h2>
             </div>
             <div class="space-y-3">
-                <div class="flex items-start gap-3">
-                    <div class="bg-orange-100 p-1.5 rounded-lg text-orange-500 mt-0.5"><i data-lucide="sparkles" class="w-3.5 h-3.5"></i></div>
-                    <p id="overview-highlights" class="text-[12px] text-gray-600 font-medium leading-relaxed"></p>
-                </div>
+                <p id="overview-highlights" class="text-[12px] text-gray-600 font-medium leading-relaxed"></p>
                 <div class="flex items-start gap-3 border-t border-gray-50 pt-3">
                     <div class="bg-red-100 p-1.5 rounded-lg text-red-500 mt-0.5"><i data-lucide="calendar-check" class="w-3.5 h-3.5"></i></div>
                     <p id="overview-booking" class="text-[12px] text-gray-600 font-medium leading-relaxed"></p>
                 </div>
             </div>
-        </div>
-
-        <div id="hotel-display" class="mb-6 bg-white border border-gray-100 rounded-[2.2rem] p-6 shadow-sm hidden">
-            <div class="flex gap-3 mb-4">
-                <div class="bg-blue-500 p-2 rounded-xl text-white h-fit">
-                    <i data-lucide="hotel" class="w-5 h-5"></i>
-                </div>
-                <div class="flex-1">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Tonight's Stay</p>
-                    <h2 id="hotel-name" class="font-bold text-gray-800 text-base leading-tight"></h2>
-                </div>
-            </div>
-            <p id="hotel-note" class="text-[12px] text-gray-500 leading-relaxed bg-gray-50 p-4 rounded-2xl mb-4 wrap-text"></p>
-            <button id="hotel-nav-btn" class="w-full bg-blue-50 text-blue-600 py-4 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform">
-                <i data-lucide="navigation" class="w-4 h-4"></i> 飯店導航
-            </button>
         </div>
 
         <div id="daily-timeline" class="relative timeline-line space-y-6"></div>
@@ -87,81 +48,63 @@
     <script>
         const cityCoords = { "巴黎": {lat: 48.85, lon: 2.35}, "巴塞隆納": {lat: 41.38, lon: 2.17}, "馬德里": {lat: 40.41, lon: -3.70}, "維也納": {lat: 48.20, lon: 16.37} };
         
+        // --- 行程資料區 ---
+        // 提示：如果要增加 PDF 按鈕，請在該 event 中填入 pdf: "你的雲端網址"
         const itinerary = {
-            1: { date: "02/17", day: "二", city: "巴黎", highlights: "啟程前往歐洲時區。", booking: "長榮航空 BR087 / T2 / 57K, 57J", hotel: "飛機上", events: [
-                { time: "23:00", desc: "台北TPE → 巴黎CDG", transport: "長榮航空 BR087", info: "航程約15小時，準備進入歐洲時區。" }
+            1: { date: "02/17", day: "二", city: "巴黎", highlights: "啟程前往歐洲。", booking: "長榮航空 BR087", events: [
+                { time: "23:00", desc: "台北TPE → 巴黎CDG", transport: "長榮航空 BR087", info: "準備啟航", pdf: "https://example.com/ticket" }
             ]},
-            2: { date: "02/18", day: "三", city: "巴黎", highlights: "鐵塔散步、塞納河日落遊船。調時差首日，多為室外活動，注意保暖。", booking: "19:30 Aldehyde 米其林餐廳 (須著裝)", hotel: "Citadines Saint-Germain-des-Prés Paris", hotelNote: "訂單含VAT，到店付城市稅 €84.50。進房錄影檢查設備。", events: [
-                { time: "07:45", desc: "抵達CDG T1航廈", info: "辦理EES、過海關、領行李。", map: "https://www.google.com/maps/search/CDG+Terminal+1" },
-                { time: "09:00", desc: "機場接送到飯店", transport: "計程車 (45-70分鐘)", info: "開通網路、門號，買Navigo Pass。", map: "https://www.google.com/maps/search/Citadines+Saint-Germain-des-Prés+Paris" },
-                { time: "10:30", desc: "寄行李、拍照散步", transport: "步行", info: "去藝術橋、Pont Neuf、Square du Vert-Galant拍照。", map: "https://www.google.com/maps/search/Square+du+Vert-Galant" },
-                { time: "12:00", desc: "聖母院搭巴士至凱旋門", transport: "BigBus (30分鐘)", info: "下車拍照。", map: "https://www.google.com/maps/search/Arc+de+Triomphe" },
-                { time: "13:00", desc: "凱旋門搭巴士至夏樂宮", transport: "BigBus (30分鐘)", info: "拍照點。", map: "https://www.google.com/maps/search/Trocadéro" },
-                { time: "14:30", desc: "鐵塔附近深度散步", transport: "步行", info: "Ave. de Camons → 紐約大街 → 比爾哈凱姆橋。", map: "https://www.google.com/maps/search/Pont+de+Bir-Hakeim" },
-                { time: "17:00", desc: "Bateaux Parisiens 日落遊船", info: "航行約60分鐘。可早點去佔位置。", map: "https://www.google.com/maps/search/Bateaux+Parisiens" },
-                { time: "19:30", desc: "Aldehyde 用餐", info: "米其林一星晚宴。", map: "https://www.google.com/maps/search/Restaurant+Aldehyde+Paris" }
+            2: { date: "02/18", day: "三", city: "巴黎", highlights: "鐵塔散步、塞納河日落遊船。", booking: "19:30 Aldehyde 餐廳", hotel: "Citadines Saint-Germain-des-Prés Paris", events: [
+                { time: "09:00", desc: "機場接送到飯店", transport: "計程車", info: "辦理網路、Navigo Pass", map: "https://maps.app.goo.gl/xxx", pdf: "" },
+                { time: "17:00", desc: "Bateaux Parisiens 日落遊船", info: "航行約60分鐘", map: "https://maps.app.goo.gl/xxx", pdf: "https://example.com/cruise_ticket" },
+                { time: "19:30", desc: "Aldehyde 用餐", info: "米其林一星晚宴", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            3: { date: "02/19", day: "四", city: "巴黎", highlights: "聖母院登頂、奧賽藝術之夜。", booking: "奧賽美術館晚場、Le Vieux Bistrot 午餐", hotel: "Citadines Saint-Germain-des-Prés Paris", events: [
-                { time: "09:00", desc: "塔樓登頂參觀", info: "聖母院登頂。", map: "https://www.google.com/maps/search/Cathédrale+Notre-Dame+de+Paris" },
-                { time: "10:30", desc: "聖徒禮拜堂 & 古監獄", transport: "步行", info: "免排隊通道。", map: "https://www.google.com/maps/search/Sainte-Chapelle" },
-                { time: "13:30", desc: "Le Vieux Bistrot 用餐", info: "紅酒燉牛肉。", map: "https://www.google.com/maps/search/Le+Vieux+Bistrot+Paris" },
-                { time: "18:00", desc: "奧賽美術館 (晚場)", info: "21:30 商店關閉。", map: "https://www.google.com/maps/search/Musée+d'Orsay" },
-                { time: "21:45", desc: "Les Antiquaires 用餐", info: "鴨胸、洋蔥湯。", map: "https://www.google.com/maps/search/Les+Antiquaires+Paris" }
+            3: { date: "02/19", day: "四", city: "巴黎", highlights: "聖母院與奧賽之夜。", booking: "奧賽美術館晚場", events: [
+                { time: "09:00", desc: "聖母院登頂參觀", info: "先去1F紀念品店", map: "https://maps.app.goo.gl/xxx", pdf: "" },
+                { time: "18:00", desc: "奧賽美術館 (晚場)", info: "經花神/雙叟咖啡館", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            4: { date: "02/20", day: "五", city: "巴黎", highlights: "羅浮宮、歌劇院、蒙帕納斯夜景。", booking: "羅浮宮 09:00 入場、Le suffren 晚餐", hotel: "Citadines Saint-Germain-des-Prés Paris", events: [
-                { time: "09:00", desc: "羅浮宮參觀", info: "二樓領取語音導覽機。", map: "https://www.google.com/maps/search/Louvre+Museum" },
-                { time: "15:00", desc: "前往巴黎歌劇院", info: "Palais Royal → Opéra。", map: "https://www.google.com/maps/search/Palais+Garnier" },
-                { time: "17:00", desc: "拉法葉百貨", info: "上觀景台看風景。", map: "https://www.google.com/maps/search/Galeries+Lafayette+Paris" },
-                { time: "18:30", desc: "蒙帕納斯大廈", info: "看巴黎夜景。", map: "https://www.google.com/maps/search/Tour+Montparnasse" },
-                { time: "20:00", desc: "Le suffren 用餐", info: "推薦：海鮮、油封鴨胸。", map: "https://www.google.com/maps/search/Le+suffren+Paris" }
+            4: { date: "02/20", day: "五", city: "巴黎", highlights: "羅浮宮與歌劇院。", booking: "羅浮宮 09:00 入場", events: [
+                { time: "09:00", desc: "羅浮宮參觀", info: "領取語音導覽機", map: "https://maps.app.goo.gl/xxx", pdf: "" },
+                { time: "20:00", desc: "Le suffren 用餐", info: "海鮮、油封鴨胸", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            5: { date: "02/21", day: "六", city: "巴黎", highlights: "凡爾賽宮與蒙馬特。", booking: "凡爾賽宮預約、Le Bouclard 晚餐", hotel: "Citadines Saint-Germain-des-Prés Paris", events: [
-                { time: "08:30", desc: "參觀凡爾賽主宮殿", info: "鏡廳參觀。", map: "https://www.google.com/maps/search/Palace+of+Versailles" },
-                { time: "16:30", desc: "蒙馬特巡禮", info: "聖心堂、小丘廣場。", map: "https://www.google.com/maps/search/Sacré-Cœur+Paris" },
-                { time: "18:30", desc: "Le Bouclard 用餐", info: "推薦：洋蔥湯。", map: "https://www.google.com/maps/search/Le+Bouclard+Paris" }
+            5: { date: "02/21", day: "六", city: "巴黎", highlights: "凡爾賽宮與蒙馬特。", booking: "凡爾賽宮預約", events: [
+                { time: "08:30", desc: "凡爾賽宮主殿", info: "APP有中文導覽", map: "https://maps.app.goo.gl/xxx", pdf: "" },
+                { time: "16:30", desc: "蒙馬特巡禮", info: "聖心堂、小丘廣場", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            6: { date: "02/22", day: "日", city: "巴黎", highlights: "跳蚤市場、瑪黑區走讀、瘋馬秀。", booking: "19:40 瘋馬秀", hotel: "Citadines Saint-Germain-des-Prés Paris", events: [
-                { time: "08:00", desc: "凡夫跳蚤市場", info: "Porte de Vanves。", map: "https://www.google.com/maps/search/Marché+aux+puces+de+la+Porte+de+Vanves" },
-                { time: "10:30", desc: "羅丹美術館", info: "地鐵站附近有廁所。", map: "https://www.google.com/maps/search/Musée+Rodin" },
-                { time: "19:40", desc: "瘋馬秀表演", info: "表演欣賞。", map: "https://www.google.com/maps/search/Crazy+Horse+Paris" }
+            6: { date: "02/22", day: "日", city: "巴黎", highlights: "跳蚤市場、瘋馬秀。", booking: "19:40 瘋馬秀", events: [
+                { time: "08:00", desc: "凡夫跳蚤市場", info: "Porte de Vanves", map: "https://maps.app.goo.gl/xxx", pdf: "" },
+                { time: "19:40", desc: "瘋馬秀表演", info: "欣賞華麗表演", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            7: { date: "02/23", day: "一", city: "巴塞隆納", highlights: "跨國高鐵移動。", booking: "TGV 07:42 出發", hotel: "Aparthotel Atenea Calabria", events: [
-                { time: "07:42", desc: "巴黎里昂車站出發", info: "前往巴塞隆納。", map: "https://www.google.com/maps/search/Gare+de+Lyon" },
-                { time: "17:00", desc: "蒙特惠奇纜車", info: "看夕陽觀景台。", map: "https://www.google.com/maps/search/Telefèric+de+Montjuïc" },
-                { time: "20:00", desc: "一品蘭州牛肉麵", info: "晚餐。", map: "https://www.google.com/maps/search/一品蘭州牛肉麵+Barcelona" }
+            7: { date: "02/23", day: "一", city: "巴塞隆納", highlights: "跨國高鐵，夕陽纜車。", booking: "TGV 07:42 出發", events: [
+                { time: "07:42", desc: "TGV ➔ 巴塞隆納", transport: "火車 (6h50m)", info: "里昂車站出發", map: "https://maps.app.goo.gl/xxx", pdf: "" },
+                { time: "17:00", desc: "蒙特惠奇纜車", info: "看夕陽觀景台", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            8: { date: "02/24", day: "二", city: "巴塞隆納", highlights: "歌德區走讀、米拉之家日落。", booking: "17:00 米拉之家", hotel: "Aparthotel Atenea Calabria", events: [
-                { time: "07:30", desc: "歌德區 CityWalk", info: "嘆息橋、聖安娜教堂。", map: "https://www.google.com/maps/search/Ponti+dei+Sospiri+Barcelona" },
-                { time: "12:30", desc: "Colom 用餐", info: "海鮮燉飯。", map: "https://www.google.com/maps/search/Colom+Restaurant+Barcelona" },
-                { time: "17:00", desc: "米拉之家", info: "屋頂日落。", map: "https://www.google.com/maps/search/Casa+Milà" }
+            8: { date: "02/24", day: "二", city: "巴塞隆納", highlights: "歌德區與米拉之家。", booking: "17:00 米拉之家", events: [
+                { time: "07:30", desc: "歌德區 CityWalk", info: "嘆息橋、聖安娜教堂", map: "https://maps.app.goo.gl/xxx", pdf: "" },
+                { time: "17:00", desc: "米拉之家", info: "屋頂看日落", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            9: { date: "02/25", day: "三", city: "巴塞隆納", highlights: "高第建築全攻略。", booking: "11:00 聖家堂、17:00 奎爾公園", hotel: "Aparthotel Atenea Calabria", events: [
-                { time: "11:00", desc: "聖家堂參觀", info: "不可遲到。", map: "https://www.google.com/maps/search/La+Sagrada+Familia" },
-                { time: "17:00", desc: "奎爾公園", info: "主露臺日落。", map: "https://www.google.com/maps/search/Park+Güell" },
-                { time: "19:30", desc: "四隻貓餐廳", info: "Els Quatre Gats。", map: "https://www.google.com/maps/search/Els+Quatre+Gats" }
+            9: { date: "02/25", day: "三", city: "巴塞隆納", highlights: "高第建築全攻略。", booking: "11:00 聖家堂", events: [
+                { time: "11:00", desc: "聖家堂參觀", info: "不可遲到", map: "https://maps.app.goo.gl/xxx", pdf: "" },
+                { time: "17:00", desc: "奎爾公園", info: "主露臺拍大片", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            10: { date: "02/26", day: "四", city: "巴塞隆納", highlights: "達利劇院、魔幻噴泉。", booking: "08:14 費格拉斯火車", hotel: "Aparthotel Atenea Calabria", events: [
-                { time: "08:14", desc: "Sants 車站出發", info: "前往達利劇院。", map: "https://www.google.com/maps/search/Barcelona+Sants" },
-                { time: "10:00", desc: "達利劇院博物館", info: "Figueres。", map: "https://www.google.com/maps/search/Dalí+Theatre-Museum" }
+            10: { date: "02/26", day: "四", city: "巴塞隆納", highlights: "達利與魔幻噴泉。", booking: "08:14 費格拉斯火車", events: [
+                { time: "10:00", desc: "達利劇院博物館", info: "Figueres", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            11: { date: "02/27", day: "五", city: "馬德里", highlights: "三大博物館馬拉松。", booking: "08:25 AVE 高鐵", hotel: "Hotel Catalonia Atocha", events: [
-                { time: "14:30", desc: "普拉多博物館", info: "最重要的美術館。", map: "https://www.google.com/maps/search/Museo+Nacional+del+Prado" },
-                { time: "18:00", desc: "索菲亞王后博物館", info: "看格爾尼卡。", map: "https://www.google.com/maps/search/Museo+Nacional+Centro+de+Arte+Reina+Sofía" }
+            11: { date: "02/27", day: "五", city: "馬德里", highlights: "藝術金三角巡禮。", booking: "08:25 AVE高鐵", events: [
+                { time: "14:30", desc: "普拉多博物館", info: "必看名畫", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            12: { date: "02/28", day: "六", city: "馬德里", highlights: "皇宮與神廟日落。", booking: "10:00 馬德里皇宮", hotel: "Hotel Catalonia Atocha", events: [
-                { time: "10:00", desc: "馬德里皇宮", info: "參觀宮殿。", map: "https://www.google.com/maps/search/Royal+Palace+of+Madrid" },
-                { time: "18:00", desc: "德波神廟日落", info: "埃及神廟。", map: "https://www.google.com/maps/search/Temple+of+Debod" }
+            12: { date: "02/28", day: "六", city: "馬德里", highlights: "皇宮與德波神廟。", booking: "10:00 馬德里皇宮", events: [
+                { time: "10:00", desc: "馬德里皇宮", info: "極盡奢華", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            13: { date: "03/01", day: "日", city: "馬德里", highlights: "搭機前往維也納。", booking: "19:55 班機", hotel: "飛機上", events: [
-                { time: "09:30", desc: "麗池公園", info: "水晶宮。", map: "https://www.google.com/maps/search/El+Retiro+Park" },
-                { time: "15:00", desc: "聖米格爾市集", info: "吃小食。", map: "https://www.google.com/maps/search/Mercado+de+San+Miguel" }
+            13: { date: "03/01", day: "日", city: "維也納", highlights: "轉機前往維也納。", booking: "19:55 班機", events: [
+                { time: "15:00", desc: "聖米格爾市集", info: "晚餐小食", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            14: { date: "03/02", day: "一", city: "維也納", highlights: "維也納快閃與返台。", booking: "Café Central 早餐", hotel: "飛機上", events: [
-                { time: "08:00", desc: "Café Central", info: "維也納咖啡。", map: "https://www.google.com/maps/search/Café+Central+Vienna" },
-                { time: "12:05", desc: "維也納機場", info: "BR066 返台。", map: "https://www.google.com/maps/search/Vienna+International+Airport" }
+            14: { date: "03/02", day: "一", city: "維也納", highlights: "維也納快閃與返台。", booking: "Café Central 早餐", events: [
+                { time: "08:00", desc: "Café Central", info: "經典維也納咖啡", map: "https://maps.app.goo.gl/xxx", pdf: "" },
+                { time: "12:05", desc: "返台 BR066", info: "維也納機場", map: "https://maps.app.goo.gl/xxx", pdf: "" }
             ]},
-            15: { date: "03/03", day: "二", city: "台北", highlights: "抵達，準時上班！", hotel: "台北", events: [
-                { time: "06:40", desc: "桃園機場", info: "回家或上班。", map: "https://www.google.com/maps/search/Taoyuan+Airport+Terminal+2" }
+            15: { date: "03/03", day: "二", city: "台北", highlights: "抵達台灣。", events: [
+                { time: "06:40", desc: "桃園機場 T2", info: "回家了！", map: "", pdf: "" }
             ]}
         };
 
@@ -202,20 +145,12 @@
             if (!data) return;
 
             document.getElementById('overview-title').innerText = `${data.city} · Day ${day}`;
-            document.getElementById('overview-highlights').innerText = data.highlights || "享受每一天的行程！";
-            document.getElementById('overview-booking').innerText = data.booking || "今日無預定事項。";
+            document.getElementById('overview-highlights').innerText = data.highlights;
+            document.getElementById('overview-booking').innerText = data.booking;
             fetchWeather(data.city);
 
-            const hotelDiv = document.getElementById('hotel-display');
-            if(data.hotel && !["飛機上", "台北"].includes(data.hotel)) {
-                hotelDiv.classList.remove('hidden');
-                document.getElementById('hotel-name').innerText = data.hotel;
-                document.getElementById('hotel-note').innerText = data.hotelNote || "請於進房時檢查設備。";
-                document.getElementById('hotel-nav-btn').onclick = () => openMap(data.hotel);
-            } else { hotelDiv.classList.add('hidden'); }
-
             const timeline = document.getElementById('daily-timeline');
-            timeline.innerHTML = `<div class="ml-14 mb-4"><p class="text-[11px] font-bold text-blue-500 uppercase tracking-widest">Timeline · ${data.date} (${data.day})</p></div>`;
+            timeline.innerHTML = `<div class="ml-14 mb-4"><p class="text-[11px] font-bold text-blue-500 uppercase tracking-widest">Timeline · ${data.date}</p></div>`;
             
             data.events.forEach(ev => {
                 const card = document.createElement('div');
@@ -228,23 +163,19 @@
                                 <span class="bg-blue-50 text-blue-600 text-[14px] font-black px-3 py-1.5 rounded-xl min-w-[70px] text-center">${ev.time}</span>
                                 <h3 class="font-bold text-gray-800 text-[15px] leading-tight flex-1">${ev.desc}</h3>
                             </div>
-                            ${ev.transport ? `<div class="flex items-start gap-2 bg-blue-50/50 px-3 py-2 rounded-xl border border-blue-100"><i data-lucide="tram-front" class="w-5 h-5 text-blue-500 mt-0.5"></i><span class="text-[11px] text-blue-700 font-bold wrap-text">${ev.transport}</span></div>` : ''}
-                            ${ev.info ? `<p class="text-[12px] text-gray-500 leading-relaxed wrap-text px-1">${ev.info}</p>` : ''}
+                            ${ev.transport ? `<div class="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-xl text-blue-700 text-[11px] font-bold"><i data-lucide="tram-front" class="w-4 h-4"></i>${ev.transport}</div>` : ''}
+                            ${ev.info ? `<p class="text-[12px] text-gray-500 px-1 wrap-text">${ev.info}</p>` : ''}
                             <div class="flex gap-2 mt-1">
-                                ${ev.map ? `<a href="${ev.map}" target="_blank" class="flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 text-[11px] font-bold px-3 py-2 rounded-lg border border-gray-200 transition-colors"><i data-lucide="navigation" class="w-3.5 h-3.5 text-blue-500"></i>導航</a>` : ''}
-                                ${ev.pdf ? `<a href="${ev.pdf}" target="_blank" class="flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 text-gray-600 text-[11px] font-bold px-3 py-2 rounded-lg border border-gray-200 transition-colors"><i data-lucide="file-text" class="w-3.5 h-3.5 text-red-500"></i>PDF</a>` : ''}
+                                ${ev.map ? `<a href="${ev.map}" target="_blank" class="flex items-center gap-1.5 bg-gray-50 text-gray-600 text-[11px] font-bold px-3 py-2 rounded-lg border border-gray-200"><i data-lucide="navigation" class="w-3.5 h-3.5 text-blue-500"></i>導航</a>` : ''}
+                                ${ev.pdf ? `<a href="${ev.pdf}" target="_blank" class="flex items-center gap-1.5 bg-gray-50 text-gray-600 text-[11px] font-bold px-3 py-2 rounded-lg border border-gray-200"><i data-lucide="file-text" class="w-3.5 h-3.5 text-red-500"></i>PDF</a>` : ''}
                             </div>
                         </div>
                     </div>
                 `;
                 timeline.appendChild(card);
             });
-            if (typeof lucide !== 'undefined') lucide.createIcons();
+            lucide.createIcons();
             window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-
-        function openMap(query) {
-            window.open(`https://www.google.com/maps/search/${encodeURIComponent(query)}`, '_blank');
         }
 
         window.onload = init;
