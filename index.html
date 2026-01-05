@@ -14,7 +14,8 @@
             --morandi-green: #97A398;   
             --morandi-text: #3D444C;    
             --morandi-card: #DEDDD7;    
-            --morandi-dark: #5A6B78;    /* 用於標題加強對比 */
+            --morandi-dark: #5A6B78;    
+            --card-border: rgba(0, 0, 0, 0.06); /* 淡色外框線 */
         }
 
         body { 
@@ -25,20 +26,20 @@
         
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         
-        /* 橫向工具列容器：背景色長條，移除陰影 */
+        /* 橫向工具列容器：移除陰影與底線外框 */
         header.sticky {
             background-color: var(--morandi-bg);
             box-shadow: none; 
-            border-bottom: 1px solid rgba(0,0,0,0.03);
+            border-bottom: none;
         }
 
-        /* 橫向工具列按鈕：字號調大，行距放寬一點 */
+        /* 橫向工具列按鈕 */
         .date-card { 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             background-color: rgba(255, 255, 255, 0.5);
             border: 1px solid rgba(0, 0, 0, 0.08);
             aspect-ratio: 1 / 1;
-            line-height: 1.3; /* 調整行距不再太擠 */
+            line-height: 1.3; 
         }
         .date-card.active { 
             background-color: var(--morandi-blue); 
@@ -54,15 +55,20 @@
         }
         .wrap-text { word-break: break-all; white-space: pre-line; }
 
-        /* Today's Highlight 卡片 */
+        /* Today's Highlight 卡片：使用淡色外框 */
         .master-card-styled {
             background-color: var(--morandi-card);
-            border: 1px solid rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--card-border);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
         }
 
-        /* 調整卡片內的通用字號微調 */
-        .event-card-desc { font-size: 16.5px; } /* 稍微大一點點 */
+        /* 行程卡片：背景白色 80%，外框使用淡色 */
+        .event-card {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: 1px solid var(--card-border);
+        }
+
+        .event-card-desc { font-size: 16.5px; } 
         .event-card-time { font-size: 14px; }
     </style>
 </head>
@@ -72,7 +78,7 @@
         <div id="date-selector" class="flex overflow-x-auto px-5 py-5 space-x-3 hide-scrollbar"></div>
     </header>
 
-    <main class="px-4 mt-4">
+    <main class="px-4 mt-2">
         <div id="master-card" class="mb-8 master-card-styled rounded-[2.5rem] p-7 relative overflow-hidden">
             <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/30 rounded-full blur-3xl"></div>
             
@@ -81,7 +87,7 @@
                     <span class="text-[10px] bg-slate-700 text-white px-2.5 py-1 rounded-md font-black tracking-widest uppercase shadow-sm">Today's Highlight</span>
                     <h2 id="overview-title" class="text-2xl font-black mt-3 text-slate-800 tracking-tight">載入中...</h2>
                 </div>
-                <div id="weather-box" class="flex items-center gap-2 bg-white/50 backdrop-blur-sm px-3 py-2 rounded-2xl border border-white/60 shadow-sm text-slate-700">
+                <div id="weather-box" class="flex items-center gap-2 bg-white/50 backdrop-blur-sm px-3 py-2 rounded-2xl shadow-sm text-slate-700 border-none">
                     <span id="temp-display" class="text-sm font-black">--°C</span>
                     <i id="weather-icon" data-lucide="cloud-sun" class="w-4 h-4 text-slate-500"></i>
                 </div>
@@ -124,10 +130,7 @@
             Object.keys(itinerary).forEach(day => {
                 const item = itinerary[day];
                 const btn = document.createElement('button');
-                
-                // 字號調整大一點點
                 btn.className = `date-card flex-shrink-0 w-24 h-24 rounded-[30px] flex flex-col items-center justify-center transition-all px-1 ${day == currentDay ? 'active' : 'text-slate-600'}`;
-                
                 btn.onclick = () => showDay(day);
                 btn.innerHTML = `
                     <span class="text-[12px] font-black opacity-70 uppercase">D${day}</span>
@@ -157,10 +160,10 @@
                 bookingText.innerText = data.booking;
 
                 if (data.hotelMap) {
-                    // 交換配色：按鈕改為淺色背景
+                    // 定位導航按鈕：移除外框線，縮小尺寸 (px-4 py-2)
                     bookingMapBtn.innerHTML = `
-                        <a href="${data.hotelMap}" target="_blank" class="inline-flex items-center gap-2 bg-white/70 text-slate-700 text-[12px] font-black px-5 py-2.5 rounded-xl border border-white/80 shadow-sm transition-transform active:scale-95">
-                            <i data-lucide="navigation" class="w-4 h-4"></i> 定位導航
+                        <a href="${data.hotelMap}" target="_blank" class="inline-flex items-center gap-2 bg-white/70 text-slate-700 text-[11px] font-black px-4 py-2 rounded-xl shadow-sm border-none transition-transform active:scale-95">
+                            <i data-lucide="navigation" class="w-3.5 h-3.5"></i> 定位導航
                         </a>`;
                 } else {
                     bookingMapBtn.innerHTML = '';
@@ -172,18 +175,15 @@
             fetchWeather(data.city);
 
             const timeline = document.getElementById('daily-timeline');
-            timeline.innerHTML = `
-                <div class="ml-14 mb-4">
-                    <p class="text-[12px] font-black text-slate-500 uppercase tracking-[0.2em] opacity-80">${data.date} / ${data.day}</p>
-                </div>
-            `;
+            // 移除日期文字資訊，僅保留結構
+            timeline.innerHTML = '';
 
             data.events.forEach(ev => {
                 const card = document.createElement('div');
                 card.className = "relative pl-14 pr-2 mb-6";
                 card.innerHTML = `
                     <div class="absolute left-[20px] top-[28px] w-[10px] h-[10px] rounded-full bg-slate-500 ring-4 ring-white z-10 shadow-sm"></div>
-                    <div class="bg-white/80 rounded-[2.2rem] p-6 border border-white/60 shadow-sm">
+                    <div class="event-card rounded-[2.2rem] p-6 shadow-sm">
                         <div class="flex flex-col gap-3">
                             <div class="flex items-center gap-3">
                                 <span class="bg-slate-200 text-slate-700 event-card-time font-black px-3 py-1.5 rounded-xl min-w-[75px] text-center">${ev.time}</span>
