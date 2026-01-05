@@ -22,6 +22,7 @@
             background-color: var(--morandi-bg); 
             color: var(--morandi-text);
             margin: 0;
+            -webkit-tap-highlight-color: transparent;
         }
         
         header.sticky {
@@ -29,9 +30,10 @@
             position: sticky;
             top: 0;
             z-index: 50;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
         }
 
-        /* 修正 1：確保滑動捲軸在網頁版可見且可用 */
+        /* 頂部日期選擇器佈局 */
         #date-selector {
             display: flex;
             overflow-x: auto;
@@ -42,13 +44,12 @@
             gap: 12px;
         }
 
-        /* 美化捲軸樣式 */
+        /* 隱藏捲軸但保持功能 */
         #date-selector::-webkit-scrollbar {
-            height: 6px;
+            height: 4px;
         }
         #date-selector::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
-            border-radius: 10px;
+            background: rgba(0,0,0,0.02);
         }
         #date-selector::-webkit-scrollbar-thumb {
             background: var(--morandi-blue);
@@ -57,24 +58,24 @@
 
         .date-card { 
             flex: 0 0 auto;
-            width: 96px;
-            height: 96px;
+            width: 90px;
+            height: 90px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            background-color: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-radius: 30px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 28px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 8px !important;
+            padding: 12px 8px !important;
             cursor: pointer;
         }
 
         .date-card.active { 
             background-color: var(--morandi-blue); 
             color: white; 
-            box-shadow: 0 8px 15px rgba(125, 146, 161, 0.4); 
+            box-shadow: 0 10px 20px rgba(125, 146, 161, 0.35); 
             transform: translateY(-2px);
             border-color: transparent;
         }
@@ -90,43 +91,48 @@
 
         .slash-line {
             width: 1.5px;
-            height: 30px;
+            height: 28px;
             background-color: currentColor;
-            opacity: 0.5;
+            opacity: 0.4;
             transform: rotate(20deg);
-            margin: 0 8px;
         }
 
-        .month-pos { align-self: flex-start; margin-top: -2px; }
-        .date-pos { align-self: flex-end; margin-bottom: -2px; }
+        .month-pos { align-self: flex-start; }
+        .date-pos { align-self: flex-end; }
         
+        /* 時間軸線條 */
         .timeline-line::before { 
             content: ''; position: absolute; left: 24px; top: 0; bottom: 0; width: 2px; 
-            background: var(--morandi-green); opacity: 0.4; 
+            background: var(--morandi-green); opacity: 0.3; 
         }
 
         .master-card-styled {
             background-color: var(--morandi-card);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.04);
         }
 
         .event-card {
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.85);
             border: 1px solid var(--card-border);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.03);
+            backdrop-filter: blur(5px);
+        }
+
+        .wrap-text {
+            white-space: pre-line;
         }
     </style>
 </head>
 <body class="pb-10">
 
     <header class="sticky">
-        <div id="date-selector" class="hide-scrollbar"></div>
+        <div id="date-selector"></div>
     </header>
 
     <main class="px-4 mt-2">
         <div id="master-card" class="mb-8 master-card-styled rounded-[2.5rem] p-7 relative overflow-hidden">
-            <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/30 rounded-full blur-3xl"></div>
+            <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/20 rounded-full blur-3xl"></div>
             <div class="flex justify-between items-start relative z-10">
                 <div>
                     <span class="text-[10px] bg-slate-700 text-white px-2.5 py-1 rounded-md font-black tracking-widest uppercase shadow-sm">Today's Highlight</span>
@@ -138,6 +144,7 @@
                 </div>
             </div>
             <p id="overview-highlights" class="text-[16px] text-slate-700 font-bold mt-4 leading-relaxed relative z-10"></p>
+            
             <div id="booking-section" class="mt-6 pt-6 border-t border-slate-500/10 relative z-10">
                 <div class="flex items-center gap-2 mb-3 text-slate-500">
                     <i data-lucide="map-pin" class="w-4 h-4"></i>
@@ -152,7 +159,13 @@
     </main>
 
     <script>
-        const cityCoords = { "巴黎": {lat: 48.85, lon: 2.35}, "巴塞隆納": {lat: 41.38, lon: 2.17}, "馬德里": {lat: 40.41, lon: -3.70}, "維也納": {lat: 48.20, lon: 16.37}, "台北": {lat: 25.03, lon: 121.56} };
+        const cityCoords = { 
+            "巴黎": {lat: 48.85, lon: 2.35}, 
+            "巴塞隆納": {lat: 41.38, lon: 2.17}, 
+            "馬德里": {lat: 40.41, lon: -3.70}, 
+            "維也納": {lat: 48.20, lon: 16.37}, 
+            "台北": {lat: 25.03, lon: 121.56} 
+        };
         let currentDay = 1;
 
         // 這裡請放入您完整的行程資料
@@ -359,8 +372,119 @@
     }
 };
 
+// --- 核心邏輯控制 ---
+
         window.onload = init;
-        function init() { renderDates(); showDay(currentDay); }
+
+        function init() {
+            renderDates();
+            showDay(currentDay);
+        }
+
+        // 渲染上方日期導覽列
+        function renderDates() {
+            const selector = document.getElementById('date-selector');
+            selector.innerHTML = '';
+            
+            Object.keys(itinerary).forEach(day => {
+                const item = itinerary[day];
+                const [m, d] = item.date.split('/');
+                
+                const card = document.createElement('div');
+                card.className = `date-card ${day == currentDay ? 'active' : ''}`;
+                card.onclick = () => {
+                    showDay(parseInt(day));
+                    // 點擊後平滑捲動到該日期
+                    card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                };
+                
+                card.innerHTML = `
+                    <span class="month-pos text-[10px] font-bold opacity-80 uppercase leading-none mt-1">Day ${day}</span>
+                    <div class="slash-container">
+                        <span class="text-[18px] font-black absolute left-1 top-0">${m}</span>
+                        <div class="slash-line"></div>
+                        <span class="text-[18px] font-black absolute right-1 bottom-0">${d}</span>
+                    </div>
+                    <span class="date-pos text-[10px] font-black opacity-80 leading-none mb-1">${item.day}</span>
+                `;
+                selector.appendChild(card);
+            });
+        }
+
+        // 切換顯示特定天數的內容
+        async function showDay(day) {
+            currentDay = day;
+            const data = itinerary[day];
+            if (!data) return;
+
+            // 1. 更新導覽列高亮狀態
+            document.querySelectorAll('.date-card').forEach((el, idx) => {
+                el.classList.toggle('active', (idx + 1) === day);
+            });
+
+            // 2. 更新主摘要卡片
+            document.getElementById('overview-title').innerText = `${data.city} · Day ${day}`;
+            document.getElementById('overview-highlights').innerText = data.highlights;
+            document.getElementById('overview-booking').innerText = data.booking;
+
+            // 3. 更新住宿地圖連結
+            const mapLinkBox = document.getElementById('booking-map-link');
+            if (data.hotelMap) {
+                mapLinkBox.innerHTML = `
+                    <a href="${data.hotelMap}" target="_blank" class="inline-flex items-center gap-2 text-[12px] font-bold text-slate-500 bg-white/50 px-3 py-2 rounded-xl border border-slate-300 shadow-sm hover:bg-white transition-colors">
+                        查看位置 <i data-lucide="external-link" class="w-3 h-3"></i>
+                    </a>`;
+            } else {
+                mapLinkBox.innerHTML = '';
+            }
+
+            // 4. 渲染時間軸事件
+            const timeline = document.getElementById('daily-timeline');
+            timeline.innerHTML = data.events.map(event => `
+                <div class="relative pl-12 pr-2">
+                    <div class="absolute left-[19px] top-2 w-3 h-3 rounded-full bg-slate-400 border-2 border-white z-10"></div>
+                    
+                    <div class="event-card rounded-[2rem] p-5">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-sm font-black text-slate-400 tracking-tighter">${event.time}</span>
+                            ${event.transport ? `<span class="text-[10px] bg-slate-200/50 px-2 py-0.5 rounded text-slate-600 font-bold tracking-tight">${event.transport}</span>` : ''}
+                        </div>
+                        
+                        <h3 class="text-lg font-black text-slate-800 mb-1 leading-snug">${event.desc}</h3>
+                        <p class="text-sm text-slate-600 font-medium leading-relaxed">${event.info}</p>
+                        
+                        <div class="flex gap-3 mt-4">
+                            ${event.map ? `<a href="${event.map}" target="_blank" class="flex items-center justify-center w-9 h-9 bg-slate-100 rounded-full text-slate-600 hover:bg-slate-200"><i data-lucide="map" class="w-4 h-4"></i></a>` : ''}
+                            ${event.pdf ? `<a href="${event.pdf}" target="_blank" class="flex items-center justify-center w-9 h-9 bg-slate-100 rounded-full text-slate-600 hover:bg-slate-200"><i data-lucide="file-text" class="w-4 h-4"></i></a>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            // 5. 更新天氣與圖標
+            updateWeather(data.city);
+            lucide.createIcons();
+        }
+
+        // 串接即時天氣 (Open-Meteo API)
+        async function updateWeather(cityName) {
+            const coords = cityCoords[cityName] || cityCoords["巴黎"];
+            const tempDisplay = document.getElementById('temp-display');
+            const weatherIcon = document.getElementById('weather-icon');
+            
+            try {
+                const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current_weather=true`);
+                const weatherData = await response.json();
+                const temp = Math.round(weatherData.current_weather.temperature);
+                tempDisplay.innerText = `${temp}°C`;
+                
+                // 根據溫度微調圖標顏色 (冷色/暖色)
+                weatherIcon.style.color = temp > 20 ? '#eab308' : '#64748b';
+            } catch (e) {
+                tempDisplay.innerText = "--°C";
+                console.error("天氣獲取失敗");
+            }
+        }
     </script>
 </body>
 </html>
