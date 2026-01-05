@@ -179,37 +179,55 @@
         }
 
         function showDay(day) {
-            currentDay = day;
-            renderDates();
-            const data = itinerary[day];
-            if (!data) return;
-            document.getElementById('overview-title').innerText = `${data.city} · Day ${day}`;
-            document.getElementById('overview-highlights').innerText = data.highlights;
-            
-            const bookingSection = document.getElementById('booking-section');
-            if (data.booking) {
-                bookingSection.style.display = 'block';
-                document.getElementById('overview-booking').innerText = data.booking;
-            } else {
-                bookingSection.style.display = 'none';
-            }
+    currentDay = day;
+    renderDates();
+    const data = itinerary[day];
+    if (!data) return;
 
-            const timeline = document.getElementById('daily-timeline');
-            timeline.innerHTML = '';
-            data.events.forEach(ev => {
-                const card = document.createElement('div');
-                card.className = "relative pl-14 pr-2 mb-6";
-                card.innerHTML = `
-                    <div class="absolute left-[20px] top-[28px] w-[10px] h-[10px] rounded-full bg-slate-500 ring-4 ring-white z-10 shadow-sm"></div>
-                    <div class="event-card rounded-[2.2rem] p-6">
-                        <div class="flex items-center gap-3 mb-2">
-                            <span class="bg-slate-200 text-slate-700 text-[14px] font-black px-3 py-1.5 rounded-xl min-w-[75px] text-center">${ev.time}</span>
-                            <h3 class="font-bold text-slate-800 text-[16.5px] leading-tight">${ev.desc}</h3>
-                        </div>
-                        ${ev.transport ? `<p class="text-[13px] text-slate-600 font-bold bg-slate-100 p-2 rounded-lg">${ev.transport}</p>` : ''}
-                    </div>`;
-                timeline.appendChild(card);
-            });
+    // --- 新增：城市天數邏輯計算 ---
+    let cityDayCount = 0;
+    // 遍歷行程，計算到目前為止這個城市出現了幾次
+    for (let i = 1; i <= day; i++) {
+        if (itinerary[i] && itinerary[i].city === data.city) {
+            cityDayCount++;
+        }
+    }
+
+    // --- 修正標題顯示邏輯 ---
+    const titleEl = document.getElementById('overview-title');
+    if (data.city === "台北") {
+        titleEl.innerText = "台北";
+    } else {
+        titleEl.innerText = `${data.city} · Day ${cityDayCount}`;
+    }
+    // ----------------------------
+
+    document.getElementById('overview-highlights').innerText = data.highlights;
+    
+    const bookingSection = document.getElementById('booking-section');
+    if (data.booking) {
+        bookingSection.style.display = 'block';
+        document.getElementById('overview-booking').innerText = data.booking;
+    } else {
+        bookingSection.style.display = 'none';
+    }
+
+    const timeline = document.getElementById('daily-timeline');
+    timeline.innerHTML = '';
+    data.events.forEach(ev => {
+        const card = document.createElement('div');
+        card.className = "relative pl-14 pr-2 mb-6";
+        card.innerHTML = `
+            <div class="absolute left-[20px] top-[28px] w-[10px] h-[10px] rounded-full bg-slate-500 ring-4 ring-white z-10 shadow-sm"></div>
+            <div class="event-card rounded-[2.2rem] p-6">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="bg-slate-200 text-slate-700 text-[14px] font-black px-3 py-1.5 rounded-xl min-w-[75px] text-center">${ev.time}</span>
+                    <h3 class="font-bold text-slate-800 text-[16.5px] leading-tight">${ev.desc}</h3>
+                </div>
+                ${ev.transport ? `<p class="text-[13px] text-slate-600 font-bold bg-slate-100 p-2 rounded-lg">${ev.transport}</p>` : ''}
+            </div>`;
+        timeline.appendChild(card);
+    });
 
             fetchWeather(data.city);
             lucide.createIcons();
